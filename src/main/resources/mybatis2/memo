@@ -1,0 +1,24 @@
+<!--    &lt;!&ndash; 제품전체 불러오기 &ndash;&gt;-->
+<!--    <select id="productAll" resultType="com.shoppingmall.vo.ProductVO">-->
+<!--        SELECT P_IDX, P_ID, CATEGORY,-->
+<!--               PRODUCT,-->
+<!--               PRICE, ORI_NAME, RE_NAME, P_INTRODUCE,-->
+<!--               P_DATE-->
+<!--        FROM PRODUCT_SETTING-->
+<!--        ORDER BY P_IDX ASC-->
+<!--    </select>-->
+<!--    &lt;!&ndash; 제품전체 갯수 불러오기 &ndash;&gt;-->
+<!--    <select id="productTotalCount" resultType="_int">-->
+<!--        SELECT COUNT(*) CNT FROM PRODUCT_SETTING-->
+<!--    </select>-->
+
+<!--    &lt;!&ndash; 페이지에 해당하는 게시글 조회 &ndash;&gt;-->
+<!--    <select id="productListPerPage" resultType="com.shoppingmall.vo.ProductVO"-->
+<!--      parameterType="map">-->
+<!--      SELECT *-->
+<!--      FROM (SELECT ROWNUM R_NUM, P.*-->
+<!--            FROM (SELECT *-->
+<!--                  FROM PRODUCT_SETTING-->
+<!--                  ORDER BY P_IDX DESC) P)-->
+<!--      WHERE R_NUM BETWEEN #{begin} AND #{end}-->
+<!--    </select>-->

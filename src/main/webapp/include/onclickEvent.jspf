@@ -1,0 +1,64 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<script>
+	function productList(frm) {
+		frm.action="controller?type=productList";
+		frm.submit();
+	}
+	function productAdd(frm) {
+		frm.action="controller?type=productAdd";
+		frm.submit();
+	}
+	function productSave(frm) {
+		for(i = 0; i < frm.elements.length; i++) {
+			if (frm.elements[i].value == "값없음") {
+				alert(frm.elements[i].title + " 입력하세요");
+				frm.elements[i].focus();
+				return;
+			}
+			if (frm.elements[i].value.trim() == "") {
+				alert(frm.elements[i].title + " 입력하세요");
+				frm.elements[i].focus();
+				return;
+			}
+		}
+		frm.action="controller?type=productSave";
+		frm.submit();
+	}
+	function productEdit(frm) {
+		frm.action="controller?type=productEdit";
+		frm.submit();
+	}
+	function productUpdate(frm) {
+		for(i = 0; i < frm.elements.length; i++) {
+			if (frm.elements[i].value == "값없음") {
+				alert(frm.elements[i].title + " 입력하세요");
+				frm.elements[i].focus();
+				return;
+			}
+			if (frm.elements[i].value.trim() == "") {
+				if (i == 3) continue;
+				alert(frm.elements[i].title + " 입력하세요");
+				frm.elements[i].focus();
+				return;
+			}
+		}
+		frm.action="controller?type=productUpdate";
+		frm.submit();
+	}
+	function productEditDe(frm) {
+		frm.action="controller?type=productEditDe";
+		frm.submit();
+	}
+ 	function productDelete(frm) {
+ 		let isDelete = confirm("삭제하시겠습니까?");
+		if (isDelete) {
+			frm.action="controller?type=productDelete";
+			frm.submit();
+		} else {
+			history.back();
+		};
+		/* frm.action="controller?type=productDelete";
+		frm.submit(); */
+	}
+</script>

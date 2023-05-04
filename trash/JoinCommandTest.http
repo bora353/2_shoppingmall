@@ -1,0 +1,7 @@
+### Send POST request with body as parameters
+POST http://localhost:8080/register/controller?type=join
+Content-Type: application/x-www-form-urlencoded
+
+userId=ksb9606&password=1234&userName=KangSungBeom&Email=ksb9606@gmail.com&cellPhone=010-1234-5678
+&introduction=안녕하세요&address=15001&address=서울시강남구&&address=도곡동
+```

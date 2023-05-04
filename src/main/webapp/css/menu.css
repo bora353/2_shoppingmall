@@ -1,0 +1,25 @@
+
+@charset "UTF-8";
+	 
+	*{
+		font-family: 'East Sea Dokdo', cursive;
+		font-family: 'Gaegu', cursive;
+		font-family: 'Gowun Batang', serif;
+		}
+		
+	/* #wrap  { font-family: fantasy; }   */ 
+	
+	#wrap { margin : 0 auto; }
+	#wrap hr { width: inherit; border : 1px solid pink;}
+	#header, #nav {
+		width : 900px;
+		margin : 10px auto;
+		text-align : center;
+	}
+	#header { font-size : 2em; color : #edacb1; }
+	#nav { font-size : 1.3em; }
+	#nav a { text-decoration: none; color : #0099a4; margin : 10px; }
+	td a { text-decoration: none; color : #0099a4; margin : 10px; }
+	td a:hover { text-decoration: underline; color : tomato; }
+	#nav a:hover { text-decoration: underline; color : tomato; }
+	

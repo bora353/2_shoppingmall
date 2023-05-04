@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="shopping">
+  <!-- 전체 게시글 갯수 조회 -->
+  <select id="serviceTotalCount" resultType="int">
+    SELECT COUNT(*) AS CNT
+    FROM QNA
+  </select>
+
+
+  <!-- 게시글 조회(1개) -->
+  <select id="one" parameterType="int" resultType="QnaVO">
+    SELECT Q_NO
+         , USER_NO
+         , Q_TITLE
+         , Q_PWD
+         , Q_WRITER
+         , Q_CONTENT
+         , Q_DATE
+         , Q_HIT
+         , Q_CATEGORY
+         , Q_FILENAME
+         , Q_ORINAME
+    FROM QNA
+    WHERE Q_NO = #{qNo}
+  </select>
+
+  <!-- 페이지에 해당하는 게시글 조회 -->
+  <select id="list" resultType="QnaVO"
+    parameterType="map">
+    SELECT *
+    FROM (SELECT ROWNUM R_NUM, Q.*
+          FROM (SELECT *
+                FROM QNA
+                ORDER BY Q_NO DESC) Q)
+    WHERE R_NUM BETWEEN #{begin} AND #{end}
+  </select>
+
+  <!-- 게시글 입력 -->
+  <insert id="insert" parameterType="QnaVO">
+    INSERT INTO QNA
+    ( Q_NO, USER_NO, Q_TITLE, Q_PWD, Q_WRITER, Q_CONTENT
+    , Q_DATE, Q_HIT, Q_CATEGORY, Q_FILENAME, Q_ORINAME)
+    VALUES ( QNA_Q_NO.NEXTVAL, #{userNo}, #{qTitle}, #{qPwd}, #{qWriter}
+           , #{qContent}, SYSDATE, 0, #{qCategory}, #{qFilename}
+           , #{qOriname})
+  </insert>
+
+  <!-- 게시글 삭제 -->
+  <delete id="delete" parameterType="int">
+    DELETE
+    FROM QNA
+    WHERE Q_NO = #{qNo}
+  </delete>
+
+  <!-- 게시글 수정 -->
+  <update id="update" parameterType="QnaVO">
+    UPDATE QNA
+    SET Q_TITLE    = #{qTitle},
+        Q_WRITER   = #{qWriter},
+        Q_CONTENT  = #{qContent},
+        Q_FILENAME = #{qFilename},
+        Q_ORINAME  = #{qOriname},
+        Q_DATE     = SYSDATE,
+        Q_CATEGORY = #{qCategory}
+    WHERE Q_NO = #{qNo}
+  </update>
+
+  <!-- 게시글 조회수 -->
+  <update id="hit">
+    UPDATE QNA
+    SET Q_HIT = Q_HIT + 1
+    WHERE Q_NO = #{Q_NO}
+  </update>
+
+
+  <!-- 게시글 내에 댓글 조회 -->
+  <select id="commList" resultType="Qna_ReviewVO"
+    parameterType="int">
+    SELECT R_NO, Q_NO, USER_NO, R_PWD, R_WRITER, R_DATE, R_CONTENT
+    FROM QNA_REVIEW
+    WHERE Q_NO = #{qNo}
+    ORDER BY R_NO DESC
+  </select>
+
+  <!-- 댓글 1개 선택 -->
+  <select id="commOne" parameterType="int" resultType="Qna_ReviewVO">
+    SELECT R_NO, Q_NO, USER_NO, R_PWD, R_WRITER, R_DATE, R_CONTENT
+    FROM QNA_REVIEW
+    WHERE R_NO = #{rNo}
+  </select>
+
+  <delete id="commDelete" parameterType="int">
+    DELETE
+    FROM QNA_REVIEW
+    WHERE R_NO = #{rNo}
+  </delete>
+
+  <insert id="commInsert" parameterType="Qna_ReviewVO">
+    INSERT INTO QNA_REVIEW
+    (R_NO, Q_NO, USER_NO, R_PWD, R_WRITER,
+     R_DATE, R_CONTENT)
+    VALUES (REVIEW_R_NO.NEXTVAL, #{qNo}, 1, #{rPwd},
+            #{rWriter}, SYSDATE, #{rContent})
+  </insert>
+
+
+  <!--  -->
+
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    m.USER_IDX,
+    m.USER_ID,
+    p.PASSWORD,
+    pf.USER_NAME,
+    ma.CELLPHONE,
+    pf.ADDRESS,
+    ma.EMAIL,
+    pf.INTRODUCTION,
+    pf.JOIN_DATE,
+    ma.GENDER,
+    m.LOGIN_TYPE,
+    m.USER_TYPE
+  </sql>
+  <sql id="Table_List">
+    MEMBER_USER           m,
+    AUTH_PASSWORD         p,
+    MEMBER_PROFILE        pf,
+    MEMBER_AUTHENTICATION ma
+  </sql>
+  <sql id="Join_List">
+        m.USER_IDX = p.USER_IDX
+      AND p.USER_IDX = pf.USER_IDX
+      AND pf.USER_IDX = ma.USER_IDX
+  </sql>
+  <!--  RegisterDAO 시작-->
+  <select id="findUserById" parameterType="string" resultType="com.shoppingmall.vo.UserVO">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM
+    <include refid="Table_List"/>
+    WHERE
+    <include refid="Join_List"/>
+    AND m.USER_ID = #{userId}
+    AND m.USER_STATUS = 0
+    ORDER BY USER_IDX ASC
+  </select>
+  <select id="findUserByIdx" parameterType="_int" resultType="com.shoppingmall.vo.UserVO">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM
+    <include refid="Table_List"/>
+    WHERE
+    <include refid="Join_List"/>
+    AND m.USER_IDX = #{userIdx}
+  </select>
+  <select id="findAllUser" resultType="com.shoppingmall.vo.UserVO">
+    SELECT
+    <include refid="Base_Column_List"/>
+
+    FROM
+    <include refid="Table_List"/>
+
+    WHERE
+    <include refid="Join_List"/>
+    ORDER BY USER_IDX ASC
+  </select>
+  <insert id="insertUser" parameterType="com.shoppingmall.vo.UserVO">
+    INSERT
+    ALL
+        INTO MEMBER_USER(USER_IDX, USER_ID, LOGIN_TYPE, USER_TYPE)
+        VALUES (MEMBER_USER_SEQ.NEXTVAL,
+    #{userId},
+    #{loginType},
+    #{userType}
+    )
+    INTO
+    AUTH_PASSWORD
+    (
+    PASSWORD_IDX,
+    USER_IDX,
+    PASSWORD
+    )
+    VALUES
+    (
+    MEMBER_USER_SEQ
+    .
+    CURRVAL,
+    MEMBER_USER_SEQ
+    .
+    CURRVAL,
+    #{password}
+    )
+    INTO
+    MEMBER_PROFILE
+    (
+    PROFILE_IDX,
+    USER_IDX,
+    USER_NAME,
+    INTRODUCTION,
+    JOIN_DATE,
+    UPDATE_DATE,
+    ADDRESS
+    )
+    VALUES
+    (
+    MEMBER_USER_SEQ
+    .
+    CURRVAL,
+    MEMBER_USER_SEQ
+    .
+    CURRVAL,
+    #{userName},
+    #{introduction},
+    SYSDATE,
+    SYSDATE,
+    #{address}
+    )
+    INTO
+    MEMBER_AUTHENTICATION
+    (
+    AUTHENTICATION_IDX,
+    USER_IDX,
+    CELLPHONE,
+    EMAIL,
+    GENDER,
+    AUTH_DATE
+    )
+    VALUES
+    (
+    MEMBER_USER_SEQ
+    .
+    CURRVAL,
+    MEMBER_USER_SEQ
+    .
+    CURRVAL,
+    #{cellPhone},
+    #{email},
+    #{gender},
+    SYSDATE
+    )
+    SELECT *
+    FROM DUAL
+  </insert>
+  <update id="updateUserStatus" parameterType="com.shoppingmall.vo.UserVO">
+    UPDATE MEMBER_USER
+    SET USER_STATUS = 1
+    WHERE USER_IDX = #{userIdx}
+  </update>
+  <update id="updateUserPassword" parameterType="map">
+    UPDATE AUTH_PASSWORD
+    SET PASSWORD = #{newPassword}
+    WHERE USER_IDX = #{userIdx}
+  </update>
+  <update id="updateName" parameterType="map">
+    UPDATE AUTH_PASSWORD
+    SET PASSWORD = #{newPassword}
+    WHERE USER_IDX = #{userIdx}
+  </update>
+
+  <update id="updateCellphone" parameterType="map">
+    UPDATE MEMBER_AUTHENTICATION
+    SET CELLPHONE = #{newCellphone}
+    WHERE USER_IDX = #{userIdx}
+  </update>
+  <update id="updateEmail" parameterType="map">
+    UPDATE MEMBER_AUTHENTICATION
+    SET EMAIL = #{newEmail}
+    WHERE USER_IDX = #{userIdx}
+  </update>
+  <update id="updateIntroduction" parameterType="map">
+    UPDATE MEMBER_PROFILE
+    SET INTRODUCTION = #{newIntroduction}
+    WHERE USER_IDX = #{userIdx}
+  </update>
+  <update id="updateAddress" parameterType="map">
+    UPDATE MEMBER_PROFILE
+    SET ADDRESS = #{newAddress}
+    WHERE USER_IDX = #{userIdx}
+  </update>
+  <!-- productDAO 시작 -->
+
+
+  <!-- 제품 전체 갯수 -->
+  <select id="totalCount" resultType="_int">
+    SELECT COUNT(*) CNT
+    FROM PRODUCT_SETTING
+  </select>
+
+  <!-- 제품전체 불러오기 -->
+  <select id="productAll" resultType="ProductVO">
+    SELECT P_IDX,
+           P_ID,
+           CATEGORY,
+           PRODUCT,
+           PRICE,
+           ORI_NAME,
+           RE_NAME,
+           P_INTRODUCE,
+           P_DATE
+    FROM PRODUCT_SETTING
+    ORDER BY P_IDX DESC
+  </select>
+
+  <!-- 페이지 제품리스트 불러오기(전체) -->
+  <select id="pageList" parameterType="_int" resultType="ProductVO">
+    SELECT *
+    FROM (SELECT ROWNUM R_NUM, P.*
+          FROM (SELECT *
+                FROM PRODUCT_SETTING
+                ORDER BY P_IDX DESC) P)
+    WHERE R_NUM BETWEEN #{begin} AND #{end}
+  </select>
+  <!-- 페이지 제품리스트 불러오기(판매자 분류) -->
+  <select id="pageProductList" parameterType="ProductPaging" resultType="ProductVO">
+    SELECT *
+    FROM (SELECT ROWNUM R_NUM, P.*
+          FROM (SELECT * FROM PRODUCT_SETTING WHERE P_ID = #{pId} ORDER BY P_IDX DESC) P)
+    WHERE R_NUM BETWEEN #{begin} AND #{end}
+  </select>
+
+  <!-- 판매자별 제품리스트 불러오기 -->
+  <select id="pIdSel" parameterType="string">
+    SELECT *
+    FROM PRODUCT_SETTING
+    WHERE P_ID = #{pId}
+  </select>
+  <!-- 판매자별 제품갯수 카운트 -->
+  <select id="pIdCount" parameterType="string" resultType="_int">
+    SELECT COUNT(*)
+    FROM PRODUCT_SETTING
+    WHERE P_ID = #{pId}
+  </select>
+
+
+
+  <!-- 제품 상세페이지 -->
+  <select id="productOne" parameterType="_int" resultType="ProductVO">
+    SELECT P_IDX,
+           P_ID,
+           CATEGORY,
+           PRODUCT,
+           PRICE,
+           ORI_NAME,
+           RE_NAME,
+           P_INTRODUCE,
+           P_DATE
+    FROM PRODUCT_SETTING
+    WHERE P_IDX = #{pIdx}
+  </select>
+
+  <!-- 제품등록 -->
+  <insert id="productAdd" parameterType="ProductVO">
+    INSERT INTO PRODUCT_SETTING
+    (P_IDX, P_ID, CATEGORY, PRODUCT,
+     PRICE, ORI_NAME, RE_NAME, P_INTRODUCE)
+    VALUES (PRODUCT_SETTING_SEQ.NEXTVAL, #{pId}, #{category}, #{product},
+            #{price}, #{oriName}, #{reName}, #{pIntroduce})
+  </insert>
+
+  <!-- 제품수정 -->
+  <update id="productUp" parameterType="ProductVO">
+    UPDATE PRODUCT_SETTING
+    SET P_ID        = #{pId},
+        CATEGORY    = #{category},
+        PRODUCT     = #{product},
+        PRICE       = #{price},
+        ORI_NAME    = #{oriName},
+        RE_NAME     = #{reName},
+        P_INTRODUCE = #{pIntroduce}
+    WHERE P_IDX = #{pIdx}
+  </update>
+
+  <!-- 제품삭제 -->
+  <delete id="productDel" parameterType="_int">
+    DELETE
+    PRODUCT_SETTING WHERE P_IDX =
+    #{pIdx}
+  </delete>
+
+
+  <!--  -->
+  <!-- 페이지에 해당하는 게시글 조회 -->
+  <select id="review_all" resultType="com.shoppingmall.vo.ReviewVO"
+    parameterType="map">
+    SELECT *
+    FROM (SELECT ROWNUM R_NUM, B.*
+    FROM (SELECT *
+    FROM REVIEW
+    WHERE P_IDX = #{pIdx}
+    ORDER BY REVIEW_IDX DESC
+    ) B
+    ) c left join likehate l
+    on c.review_idx = l.review_idx
+    WHERE (R_NUM
+    BETWEEN #{begin} AND #{end})
+    ORDER BY
+    <if test="order == 0">
+      c.REVIEW_IDX DESC
+    </if>
+    <if test="order == 1">
+      l.like_check DESC
+    </if>
+    <if test="order == 2">
+      c.WRITE_DATE DESC
+    </if>
+  </select>
+
+
+  <!--혹시몰라복사 페이지에 해당하는 게시글 조회 <select id="all" resultType="com.shoppingmall.vo.ReviewVO"
+    parameterType="map"> SELECT * FROM (SELECT ROWNUM R_NUM, B.* FROM (SELECT
+    * FROM REVIEW ORDER BY <if test="order == 0"> REVIEW_IDX DESC </if> <if test="order
+    == 1"> GOOD DESC </if> <if test="order == 2"> WRITE_DATE DESC </if> ) B )
+    WHERE R_NUM BETWEEN #{begin} AND #{end} </select> -->
+
+  <!-- 하나만 조회 -->
+  <select id="review_selectOne" resultType="com.shoppingmall.vo.ReviewVO">
+    SELECT * FROM REVIEW
+    WHERE
+    REVIEW_IDX = #{reviewIdx}
+    ORDER BY REVIEW_IDX
+  </select>
+
+  <!-- 전체 글개수 -->
+  <select id="review_count" resultType="int">
+    SELECT COUNT(*) FROM REVIEW
+  </select>
+
+  <!-- 리뷰 insert -->
+  <insert id="insertReview"
+    parameterType="com.shoppingmall.vo.ReviewVO">
+    INSERT INTO REVIEW(REVIEW_IDX, P_IDX,SUBJECT, WRITER, CONTENT, FILE_NAME,
+    ORI_NAME, PWD, WRITE_DATE, HIT, STAR, GOOD, BAD)
+    VALUES (REVIEW_SEQ.NEXTVAL, #{pIdx},#{subject}, #{writer},#{content}, #{fileName},
+    #{oriName}, #{pwd}, SYSDATE, 0, #{star}, 0, 0 )
+  </insert>
+
+  <!-- 리뷰 delete -->
+  <delete id="deleteReview">
+    DELETE FROM REVIEW WHERE REVIEW_IDX=#{REVIEWIDX}
+  </delete>
+
+  <!-- 리뷰 update -->
+  <update id="updateReview"
+    parameterType="com.shoppingmall.vo.ReviewVO">
+    UPDATE REVIEW
+    SET WRITE_DATE=SYSDATE, SUBJECT=#{subject}, CONTENT=#{content},
+    STAR=#{star}, ORI_NAME=#{oriName},
+    FILE_NAME=#{fileName}
+    WHERE REVIEW_IDX=#{reviewIdx}
+  </update>
+
+  <!-- 조회수 증가처리 -->
+  <update id="review_hit">
+    UPDATE REVIEW SET HIT = HIT+1
+    WHERE REVIEW_IDX=#{reviewIdx}
+  </update>
+
+  <!-- 좋아요 -->
+  <update id="like_check" parameterType="map">
+    UPDATE LIKEHATE
+    SET LIKE_CHECK = LIKE_CHECK + 1
+    WHERE REVIEW_IDX=#{no} AND USER_IDX = #{id}
+  </update>
+
+  <!-- 좋아요 개수 -->
+  <select id="like_check_count" resultType="int">
+    SELECT like_check FROM LIKEHATE
+    WHERE REVIEW_IDX=#{no}
+  </select>
+
+  <!-- 좋아요 insert부터 -->
+  <insert id="likeInsert">
+    INSERT INTO LIKEHATE
+    SELECT LIKEHATE_SEQ.NEXTVAL
+    , 0
+    , #{reviewIdx}
+    , 0
+    FROM dual
+    WHERE NOT EXISTS (SELECT 1
+    FROM LIKEHATE
+    WHERE REVIEW_IDX = #{reviewIdx})
+  </insert>
+
+
+  <update id="like_check_cancel" parameterType="map">
+    UPDATE LIKEHATE
+    SET LIKE_CHECK = 0
+    WHERE REVIEW_IDX=#{no} AND USER_IDX = #{id}
+  </update>
+<!--리뷰 끝 -->
+
+  <!-- cart ========================================================== -->
+
+
+  <!-- 카트 전체 조회 -->
+  <select id="cart_selectAll" resultType="com.shoppingmall.vo.CartVO">
+    <!--	SELECT *
+      FROM CART C INNER JOIN PRODUCT_SETTING P
+      ON C.P_IDX = P.P_IDX
+      WHERE C.USER_IDX = 1 AND C.P_IDX = 1  -->
+
+    SELECT *
+    FROM CART C INNER JOIN PRODUCT_SETTING P
+    ON C.P_IDX = P.P_IDX
+    WHERE C.USER_IDX = #{userIdx}
+    ORDER BY CART_IDX ASC
+  </select>
+
+
+  <!-- 카트 delete -->
+  <delete id="deleteCart">
+    DELETE FROM CART
+    WHERE CART_IDX = #{cartIdx}
+  </delete>
+
+  <!-- 카트 update (plus) -->
+  <update id="updatePlusCart" parameterType="map">
+    UPDATE CART
+    SET QUANT = QUANT + 1
+    WHERE CART_IDX =
+    (SELECT C.CART_IDX
+    FROM CART C INNER JOIN PRODUCT_SETTING P
+    ON C.P_IDX = P.P_IDX
+    WHERE C.USER_IDX = #{userIdx} AND C.P_IDX = #{pIdx})
+  </update>
+
+  <!-- 카트 update (minus) -->
+  <update id="updateMinusCart" parameterType="map">
+    UPDATE CART
+    SET QUANT = QUANT - 1
+    WHERE CART_IDX =
+    (SELECT C.CART_IDX
+    FROM CART C INNER JOIN PRODUCT_SETTING P
+    ON C.P_IDX = P.P_IDX
+    WHERE C.USER_IDX = #{userIdx} AND C.P_IDX = #{pIdx})
+  </update>
+
+  <!-- 카트 한개 조회  -->
+  <select id="cart_selectOne" resultType="com.shoppingmall.vo.CartVO">
+    SELECT *
+    FROM CART C INNER JOIN PRODUCT_SETTING P
+    ON C.P_IDX = P.P_IDX
+    WHERE CART_IDX= #{cartIdx}
+  </select>
+
+  <!-- 카트 전체 개수(사람에 따른) -->
+  <select id="cartCount" resultType="int">
+    SELECT COUNT(*)
+    FROM CART C INNER JOIN PRODUCT_SETTING P
+    ON C.P_IDX = P.P_IDX
+    WHERE C.USER_IDX = #{userIdx}
+  </select>
+
+  <!-- 장바구니 추가(없으면 INSERT 있으면  UPDATE)  -->
+  <insert id="insertCart" parameterType="map">
+    MERGE INTO CART
+    USING DUAL
+    ON (P_IDX = #{pIdx} AND USER_IDX=#{userIdx})
+    WHEN MATCHED THEN UPDATE SET QUANT = QUANT + 1
+    WHEN NOT MATCHED THEN INSERT (CART_IDX, USER_IDX, P_IDX, QUANT)
+    VALUES (CART_SEQ.NEXTVAL, #{userIdx}, #{pIdx}, 1)
+  </insert>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

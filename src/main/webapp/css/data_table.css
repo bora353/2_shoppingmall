@@ -1,0 +1,14 @@
+table {
+		width : 80%;
+		margin : 30px auto 0; /* 상 좌우 하 */
+		border : 1px solid thistle;
+		border-collapse : collapse;
+	}
+	th {
+		background-color: thistle; color : white;
+	}
+	th, td { border : 1px solid thistle; padding : 5px; }
+	.red {color : tomato;}
+	.title{ width:15%; }
+	tfoot { height : 3em; text-align:center;}
+	.center { text-align:center;}

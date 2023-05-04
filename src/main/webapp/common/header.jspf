@@ -1,0 +1,35 @@
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<div id="wrapper">
+  <header id="header">
+    <div class="inner">
+      
+      <!-- Logo -->
+      <a href="home.jsp" class="logo">
+        <span class="symbol"><img src="images/logo.svg" alt=""/></span><span
+        class="title">Phantom</span>
+      </a>
+      
+      <!-- Nav -->
+      <nav>
+        <ul>
+          <li><input type="button" value="Login"></input></li>
+          <li><input type="button" value="signUp"></input></li>
+          <li><a href="#menu">Menu</a></li>
+        </ul>
+      </nav>
+      
+      
+      <!-- Menu -->
+      <nav id="menu">
+        <h2>Menu</h2>
+        <ul>
+          <li><a href="index.jsp">Home</a></li>
+          <li><a href="html/generic.html">Ipsum veroeros</a></li>
+          <li><a href="html/generic.html">Tempus etiam</a></li>
+          <li><a href="html/generic.html">Consequat dolor</a></li>
+          <li><a href="html/elements.html">Elements</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+</div>
